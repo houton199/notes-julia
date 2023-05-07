@@ -469,3 +469,5 @@ On va construire la structure de la documentation dans notre répertoire en cre
 
 ---
 ## 6. Enregistrement au registre de Julia
+
+- https://github.com/JuliaRegistries/Registrator.jl
