@@ -16,7 +16,7 @@
 
 ### Configuration de git
 
-Avant de procéder à la création de notre librarie julia, on va configurer `git` pour y ajouter nos informations personelles. 
+Avant de procéder à la création de notre librarie Julia, on va configurer `git` pour y ajouter nos informations personelles. 
 
 On vérifie d'abord que `git` est bien installé en regardant sa version :
 
@@ -39,7 +39,7 @@ $ git config --global user.email gabriel.gobeil199@gmail.com
 
 ### Génération d'une librairie de base avec Pkg
 
-Il existe une fonction dans `Pkg` qui permet de générer facilement la structure de base d'une librairie julia :
+Il existe une fonction dans `Pkg` qui permet de générer facilement la structure de base d'une librairie Julia :
 
 ```julia
 julia> ]
@@ -66,11 +66,38 @@ authors = ["Gabriel Gobeil <gabriel.gobeil199@gmail.com>"]
 version = "0.1.0"
 ```
 
-### Suivi des modifications avec git
+Plus tard, lorsqu'on ajoutera des dépendances à notre librairie, elles seront listées dans ce fichier.
+
+Le fichier de module `src/NewPackage.jl` va être celui où on charge les dépendances, inclut les fichiers de fonctions et exporte les fonctions de notre librairie. Pour le moment, il ne contient qu'une fonction `greet()` générée par défaut par `Pkg` :
+
+```
+module NewPackage
+
+greet() = print("Hello World!")
+
+end # module NewPackage
+```
+
+On peut tester cette fonction en chargeant notre librairie. Puisqu'elle n'est pas encore installée, il faut activer son environnement avant de la charger :
+
+```julia
+julia> ]
+pkg> activate .
+```
+
+Puisque la fonction `greet()` n'est pas exportée, il faut ajouter le nom de la librairie devant lorsqu'on l'appelle :
+
+```julia
+julia> using NewPackage
+julia> NewPackage.greet()
+```
+
+
+### Suivi des modifications avec `git`
 
 #### Initialisation 
 
-Pour activer le suivi des modifications avec `git`, il faut que git soit initialisé dans le répertoire de la librairie :
+Pour activer le suivi des modifications avec `git`, il faut que `git` soit initialisé dans le répertoire de la librairie :
 
 ```bash
 $ git init
@@ -92,13 +119,13 @@ $ git add Project.toml
 $ git commit -m "Ajout des fichiers"
 ```
 
-Les changements aportés devraient être visible par `git` :
+Les changements apportés devraient être visibles par `git` :
 
 ```
 $ git status
 ```
 
-La description du changement est visible dans le log :
+La description du changement peut être lue dans le log :
 
 ```
 $ git log
@@ -108,7 +135,7 @@ $ git log
 
 On aimerait pouvoir envoyer nos fichiers vers GitHub pour les partager avec le monde. Avant cela, il faut configurer notre compte pour qu'il reconnaisse notre ordinateur.
 
-#### Clé SSH
+#### Génération de la clé SSH
 
 On génère une clé SSH :
 
@@ -118,21 +145,27 @@ $ eval "$(ssh-agent -s)"
 $ ssh-add --apple-use-keychain ~/.ssh/id_ed25519
 ```
 
-On copie la clé dans notre presse-papier afin de la recopier dans le champs approprié sur GitHub :
+On copie la clé dans notre presse-papier afin de la recopier dans le champ approprié sur GitHub :
 
 ```bash
 $ pbcopy < ~/.shh/id_ed25519.pub
 ```
 
-#### Sur *GitHub.com*
+#### Configuration sur *GitHub.com*
 
-On doit se rendre sur GitHub dans les paramètres à la sectionSSH and GPG keys : [https://github.com/settings/keys](https://github.com/settings/keys).
+On doit se rendre sur GitHub dans les paramètres à la section **SSH and GPG keys** : [https://github.com/settings/keys](https://github.com/settings/keys).
 
-On clique sur le bouton vert à droite *New SSH key* puis on nomme la clé (p. ex., *mac-gab*), colle le contenu du presse-papier dans le champs **key** et clique sur le bouton vert *Add SSH key*.
+On clique sur le bouton vert à droite *New SSH key* puis on nomme la clé (p. ex., *mac-gab*), colle le contenu du presse-papier dans le champ **key** et clique sur le bouton vert *Add SSH key*.
 
-#### Synchronisation avec le dépot à distance 
+#### Création du dépot à distance 
 
-Maintenant que la clé SSH de notre ordinateur est lié à notre compte GitHub, on peut syncroniser notre dépôt local avec celui à distance :
+Maintenant que la clé SSH de notre ordinateur est lié à notre compte GitHub, on va créer le répertoire associé à notre librairie en se rendant sur [https://github.com/new](https://github.com/new).
+
+Dans le champ **Repository name**, on va entrer le nom de notre librairie : *NewPackage.jl*.
+
+Puisqu'on va syncroniser un répertoire existant, on laisse la section **Initialize this repository with:** vide, on va ajouter le fichier README plus tard.
+
+Une fois le répertoire créé sur GitHub, on peut syncroniser notre dépôt local avec celui à distance :
 
 ```bash
 $ git remote add origin git@github.com:houton199/NewPackage.jl.git
@@ -142,24 +175,47 @@ $ git push -u origin master
 ---
 ## 2. Développement de la librairie
 
-On a maintenant la librairie julia la plus basique qui soit, libre à nous de la développer à notre guise.
+On a maintenant la librairie julia la plus basique qui soit, libre à nous de la développer à notre guise ! Dans cet exemple, nous allons ajouter le fichier *README* et des dépendances à notre librairie.
 
 ### Ajout du README
 
-Un bon départ serait d'ajouter un *README* pour décrire notre librairie à ses potentiels utilisateurs.
+L'ajout d'un *README* va permettre de décrire notre librairie à ses potentiels utilisateurs. On va créer le fichier README.md à même le terminal avec `touch` puis utiliser l'éditeur `vi` pour le remplir :
 
 ```bash
 $ touch README.md
 $ vi README.md
 ```
 
-On peut ajouter un badge pour l’état du projet : https://www.repostatus.org/ 
+Dans l'éditeur `vi`, pour écrire du texte, on doit entrer de le mode insertion avec la touche <kbd>i</kbd>.
+
+On ajoute quelques lignes pour décrire le projet :
+
+```
+# NewPackage.jl
+
+Une librairie Julia exemplaire...
+```
+
+On peut aussi ajouter un [badge](https://www.repostatus.org/) pour l’état du projet : [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+
+```
+# NewPackage.jl
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 
+Une librairie Julia exemplaire...
+```
+
+
+
+
+
+Pour quitter `vi`, il faut quitter le mode insertion avec <kbd>ESC</kbd> et taper `:wq` + <kbd>Enter</kbd> (w pour *write*, q pour *quit*).
+
+
 #### Commit et synchronisation avec le dépôt à distance
 
-Une fois qu'on est satisfait des ajouts, on peut faire un commit et l'envoyer sur GitHub :
+Une fois qu'on est satisfait des ajouts au *README*, on peut faire un commit et l'envoyer sur GitHub :
 
 ```bash
 $ git add README.md
@@ -175,17 +231,30 @@ On va ajouter des dépendances à notre librairie en les installant dans son env
 
 #### Activation de l'environnement 
 
+Pour activer l'environnement de notre librairie avec `Pkg`, on utilise la fonction `activate` :
+
 ```julia
 julia> ]
 pkg> activate .
 ```
 
+On peut vérifier qu'on est dans le bon environnement avec `status` :
+
+```julia
+pkg> status
+```
+
+Il devrait être écrit qu'on se trouve dans `Project NewPackage v0.1.0`. Puisqu'aucune dépendance n'est installée pour le moment, la liste est vide.
+
 #### Installation des dépendances
+
+Les dépendances s'ajoutent de la même façon qu'on installe n'importe quelle librairie Julia avec `Pkg` :
 
 ```julia
 pkg> add Distributions
 ```
 
+Une fois la librairie installée, on peut aller voir si elle se trouve dans le fichier de projet `Project.toml` :
 
 ```
 name = "NewPackage"
