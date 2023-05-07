@@ -383,6 +383,34 @@ Il ne faut pas oublier d’inclure la libraire Test au fichier de projet.
 
 On aimerait automatiser le processus de test pour vérifier que l’ajout de nouvelles fonctionnalités à notre librairie ne viennent pas tout briser. Également, ça serait intéressant d’afficher le taux de couverture de notre librairie, soit le pourcentage de ligne de code qui est couvert par des tests.
 
+### Couverture de code avec CodeCov
+
+On va se servir de la plateforme *CodeCov* pour évaluer la couverture de notre code.
+
+Step 1: Sign up for Codecov
+
+On doit d'abord s'inscrire : [https://app.codecov.io/signup/](https://app.codecov.io/signup/)
+
+Step 3: Setup integration/team bot
+
+- Pour avoir la couverture avec Codecov, on doit installer l’application dans le répertoire.
+- Pour des librairies publiques, c’est pratiquement tout ce qu’il a faire.
+
+https://github.com/apps/codecov
+
+Step 2: Get the repository upload token
+
+```
+CODECOV_TOKEN=f8e477db-dc97-4bec-aa76-3ad49a3815c2
+```
+
+Step 4: Upload coverage reports to Codecov
+
+- Ici, puisque c’est privé, on va devoir téléverser le rapport sur Codecov pour obtenir les statistiques.
+- On fait l’ajout des instructions pour le téléversement au fichier CI.yml.
+- Une fois que les tests sont passés, le rapport est disponible sur codecov.io.
+
+
 ### GitHub Workflows
 
 On va se servir de GitHub pour lancer des processus automatiques qui vont nous informer si la librairie compile (*build status*) et quel est sa couverture avec Codecov.
@@ -403,60 +431,28 @@ Ici, je vais reprendre les instructions déjà écrites pour Extremes.jl mais
 
 
 ```
-name: CI
-on:
-  pull_request:
-    branches:
-      - master
-      - dev
-  push:
-    branches:
-      - master
-      - rm_Manifest_toml
-    tags: '*'
+name: Workflow for Codecov example-julia
+on: [push, pull_request]
 jobs:
-  test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - '1'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
+  run:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Julia 1.8.0
+        uses: julia-actions/setup-julia@v1
         with:
-          version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
-      - uses: actions/cache@v1
-        env:
-          cache-name: cache-artifacts
-        with:
-          path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+          version: "1.8.0"
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v3
+      - name: Upload coverage reports to Codecov
+      run: |
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov
+        ./codecov -t ${CODECOV_TOKEN}
 ```
-
-### Couverture de code avec CodeCov
-
-- Pour avoir la couverture avec Codecov, on doit installer l’application dans le répertoire.
-- Pour des librairies publiques, c’est pratiquement tout ce qu’il a faire.
-- Ici, puisque c’est privé, on va devoir téléverser le rapport sur Codecov pour obtenir les statistiques.
-- On fait l’ajout des instructions pour le téléversement au fichier CI.yml.
-- Une fois que les tests sont passés, le rapport est disponible sur codecov.io.
-
 
 ---
 ## 5. Documentation
@@ -466,6 +462,24 @@ Maintenant que notre librairie est sur GitHub et qu’elle est testée, nous po
 ### Structure
 
 On va construire la structure de la documentation dans notre répertoire en créant d’abord un dossier `docs` dans lequel on va ajouter le dossier `src`, qui va être le dossier dans lequel on va écrire la documentation, et un fichier `make.jl`, qui est le script julia qui va générer la documentation.
+
+```
+docs/
+├── src/
+└── make.jl
+```
+
+```
+$ julia make.jl
+```
+
+You can run a local web server out of the docs/build directory. One way to accomplish this is to install the LiveServer Julia package. You can then start the server with :
+
+```
+$ julia -e 'using LiveServer; serve(dir="docs/build")'
+```
+
+### GitHub Workflows
 
 ---
 ## 6. Enregistrement au registre de Julia
