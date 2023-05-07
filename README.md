@@ -381,12 +381,76 @@ Il ne faut pas oublier d’inclure la libraire Test au fichier de projet.
 ---
 ## 4. Intégration continue
 
-- On aimerait automatiser le processus de test pour vérifier que l’ajout de nouvelle fonctionnalité ne viennent pas tout briser.
-- Également, ça serait intéressant d’afficher la couverture de notre librairie, le pourcentage de ligne de code qui est couvert par des tests.
-- Pour ce, on va se servir de GitHub pour lancer des processus automatiques qui vont nous informer si la librairie compile et quel est sa couverture avec Codecov.
-- On doit d’abord créer un nouveau dossier caché .github dans lequel on va ajouter un dossier workflows.
-- On va y insérer un fichier d’instructions en .yml qui va dire à GitHub quoi faire lorsqu’on push quelque chose de nouveau sur une branche de notre répertoire.
-- Ici, je vais reprendre les instructions déjà écrites pour Extremes.jl mais les instructions sont relativement simple à comprendre.
+On aimerait automatiser le processus de test pour vérifier que l’ajout de nouvelles fonctionnalités à notre librairie ne viennent pas tout briser. Également, ça serait intéressant d’afficher le taux de couverture de notre librairie, soit le pourcentage de ligne de code qui est couvert par des tests.
+
+### GitHub Workflows
+
+On va se servir de GitHub pour lancer des processus automatiques qui vont nous informer si la librairie compile (*build status*) et quel est sa couverture avec Codecov.
+
+On doit d’abord créer un nouveau dossier caché `.github` dans lequel on va ajouter le dossier `workflows`. Ce dossier va être celui dans lequel on place les instructions pour dire à GitHub quoi faire lorsqu’on push quelque chose de nouveau sur une branche de notre répertoire.
+
+```
+$ mkdir -p .github/workflows
+```
+
+On va y insérer le fichier d’instructions `ci.yml` :
+
+```
+$ touch .github/workflows/ci.yml
+```
+
+Ici, je vais reprendre les instructions déjà écrites pour Extremes.jl mais les instructions sont relativement simple à comprendre.
+
+
+```
+name: CI
+on:
+  pull_request:
+    branches:
+      - master
+      - dev
+  push:
+    branches:
+      - master
+      - rm_Manifest_toml
+    tags: '*'
+jobs:
+  test:
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '1'
+        os:
+          - ubuntu-latest
+        arch:
+          - x64
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: actions/cache@v1
+        env:
+          cache-name: cache-artifacts
+        with:
+          path: ~/.julia/artifacts
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
+      - uses: julia-actions/julia-processcoverage@v1
+      - uses: codecov/codecov-action@v2
+```
+
+### Couverture de code avec CodeCov
+
 - Pour avoir la couverture avec Codecov, on doit installer l’application dans le répertoire.
 - Pour des librairies publiques, c’est pratiquement tout ce qu’il a faire.
 - Ici, puisque c’est privé, on va devoir téléverser le rapport sur Codecov pour obtenir les statistiques.
