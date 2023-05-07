@@ -469,17 +469,39 @@ docs/
 └── make.jl
 ```
 
+Pour commencer, on va créer un fichier index.md qui va être la page d’accueil de la documentation.
+On peut ensuite utiliser julia et la librairie Documenter pour construire les pages du site web.
+
 ```
 $ julia make.jl
 ```
 
-You can run a local web server out of the docs/build directory. One way to accomplish this is to install the LiveServer Julia package. You can then start the server with :
+Avant d’héberger la documentation, on peut vérifier de quoi ça a l’air localement.
+La librairie Julia ```LiveServer.jl``` va nous être utile.
 
 ```
 $ julia -e 'using LiveServer; serve(dir="docs/build")'
 ```
 
+### Ajout de docstring
+
+On va maintenant ajouter de la docstring à une fonction pour illustrer comment générer la documentation automatiquement.
+Il faut ajouter la macro @docs au fichier source index.md pour créer la docstring de la fonction.
+Ensuite, on recréé la documentation avec make.jl.
+
+
 ### GitHub Workflows
+
+- Maintenant qu’on est satisfait de notre site, on peut l’héberger sur GitHub.
+- On va d’abord créer un environnement pour construire la documentation avec Pkg.
+- Ensuite, on ajoute un fichier documentation.yml au dossier .github/workflows.
+- https://documenter.juliadocs.org/stable/man/hosting/#GitHub- Actions
+- On va aussi créer un fichier .gitignore pour ne pas inclure les fichiers créer par Documenter au suivi des modifications par git.
+
+- Il suffit ensuite de faire un git push de la documentation sur GitHub.
+- On peut ensuite vérifier que le déploiement se fait sur la branche gh-pages.
+- Si tout est bien configuré, on retrouve notre documentation.
+- Il ne reste qu’à ajouter les badges à notre README.
 
 ---
 ## 6. Enregistrement au registre de Julia
