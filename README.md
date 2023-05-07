@@ -39,7 +39,7 @@ $ git config --global user.email gabriel.gobeil199@gmail.com
 
 ### Génération d'une librairie de base avec Pkg
 
-Il existe une fonction dans `Pkg` qui permet de générer facilement la structure de base d'une librairie Julia :
+Il existe une fonction dans `Pkg` qui permet de générer facilement la structure de base d'une librairie Julia. On va s'en servir pour créer une libraire bidon appelée `NewPackage.jl` pour l'exemple : 
 
 ```julia
 julia> ]
@@ -83,12 +83,12 @@ On peut tester cette fonction en chargeant notre librairie. Puisqu'elle n'est pa
 ```julia
 julia> ]
 pkg> activate .
+julia> using NewPackage
 ```
 
 Puisque la fonction `greet()` n'est pas exportée, il faut ajouter le nom de la librairie devant lorsqu'on l'appelle :
 
 ```julia
-julia> using NewPackage
 julia> NewPackage.greet()
 ```
 
@@ -175,7 +175,7 @@ $ git push -u origin master
 ---
 ## 2. Développement de la librairie
 
-On a maintenant la librairie julia la plus basique qui soit, libre à nous de la développer à notre guise ! Dans cet exemple, nous allons ajouter le fichier *README* et des dépendances à notre librairie.
+On a maintenant la librairie Julia la plus basique qui soit, libre à nous de la développer à notre guise ! Dans cet exemple, nous allons ajouter le fichier *README* et des dépendances à notre librairie.
 
 ### Ajout du README
 
@@ -277,14 +277,105 @@ $ git commit -m "Ajout de Distributions.jl"
 $ git push origin master
 ```
 
+### Ajout d'un fichier de fonctions
+
+Pour l'instant, notre librairie n'est constituée que du fichier `src/NewPackage.jl`. Nous allons créer le fichier de fonction `functions.jl`et l'ajouter à la librairie :
+
+```
+$ touch src/functions.jl
+```
+
+On va l'ouvrir dans l'éditeur `vi` et y déplacer la fonction `greet()` contenue dans `src/NewPackage.jl`.
+
+Le fichier `src/functions.jl` devrait ressembler à ça :
+
+```
+greet() = print("Hello World!")
+```
+
+et le fichier `src/NewPackage.jl` à ça :
+
+```
+module NewPackage
+
+end # module NewPackage
+```
+
+#### Inclure des fichiers au module
+
+Pour inclure le nouveau fichier `functions.jl` à notre librairie, on va l'ajouter au module avec `include()`:
+
+```
+module NewPackage
+
+include("functions.jl");
+
+end # module NewPackage
+```
+
+#### Exporter des fonctions
+
+On peut exporter la fonction `greet()` pour y avoir accès sans devoir écrire `NewPackage.` devant à chaque fois :
+
+```
+module NewPackage
+
+include("functions.jl");
+
+export greet
+
+end # module NewPackage
+```
+
+#### Charger des dépendances
+
+C'est aussi dans ce fichier qu'on doit charger les dépendances si nécessaire :
+
+```
+module NewPackage
+
+using Distributions
+
+include("functions.jl");
+
+export greet
+
+end # module NewPackage
+```
+
+*Pour un exemple de comment structurer le répertoire source d'une librairie Julia, on peut s'inspirer de la structure d'[Extremes.jl](https://github.com/jojal5/Extremes.jl/tree/master/src) et de son fichier de [module](https://github.com/jojal5/Extremes.jl/blob/master/src/Extremes.jl).*
+
+#### Commit et synchronisation avec le dépôt à distance
+
+Une fois qu'on est satisfait des ajouts, on peut faire un commit et l'envoyer sur GitHub :
+
+```bash
+$ git add src/functions.jl
+$ git commit -m "Ajout du fichier de fonctions"
+$ git push origin master
+```
+
 ---
 ## 3. Tests
 
-- Pour augmenter la confiance envers notre librairie, c’est important de tester ses fonctionnalités.
-- La bonne pratique suggère une fonction, un test.
-- On peut ainsi structurer nos tests de façon miroir avec la structure des fonctions.
-- On va créer un dossier test avec le fichier runtests.jl qui va inclure le fichier de test pour le fichier functions.jl.
-- Il ne faut pas oublier d’inclure la libraire Test au fichier de projet.
+Pour augmenter la confiance envers notre nouvelle librairie Julia, il est important de tester ses fonctionnalités.
+
+La bonne pratique suggère *une fonction, un test*. On peut ainsi structurer nos tests de façon miroir avec la structure des fonctions.
+
+On va créer un dossier *test* avec le fichier *runtests.jl* qui va inclure le fichier de test pour le fichier *functions.jl*.
+
+```
+NewPackage.jl/
+├── Project.toml
+├── README.md
+├── src
+│   └── NewPackage.jl
+└── test
+    ├── functions_test.jl
+    └── runtests.jl
+```
+
+Il ne faut pas oublier d’inclure la libraire Test au fichier de projet.
  
 
 ---
