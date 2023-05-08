@@ -381,41 +381,30 @@ Il ne faut pas oublier d’inclure la libraire Test au fichier de projet.
 ---
 ## 4. Intégration continue
 
-On aimerait automatiser le processus de test pour vérifier que l’ajout de nouvelles fonctionnalités à notre librairie ne viennent pas tout briser. Également, ça serait intéressant d’afficher le taux de couverture de notre librairie, soit le pourcentage de ligne de code qui est couvert par des tests.
+On aimerait automatiser le processus de test pour vérifier que l’ajout de nouvelles fonctionnalités à notre librairie ne viennent pas tout briser. Également, il serait intéressant d’afficher le taux de couverture de notre librairie, soit le pourcentage de ligne de code qui est couvert par des tests.
 
-### Couverture de code avec CodeCov
+### Installation de CodeCov
 
 On va se servir de la plateforme *CodeCov* pour évaluer la couverture de notre code.
 
-Step 1: Sign up for Codecov
+On doit d'abord s'inscrire sur le site : [https://app.codecov.io/signup/](https://app.codecov.io/signup/)
 
-On doit d'abord s'inscrire : [https://app.codecov.io/signup/](https://app.codecov.io/signup/)
+Ensuite, on doit installer l’application dans le répertoire sur GitHub : [https://github.com/apps/codecov](https://github.com/apps/codecov). Pour des librairies publiques, c’est pratiquement tout ce qu’il a faire pour cette étape. 
 
-Step 3: Setup integration/team bot
-
-- Pour avoir la couverture avec Codecov, on doit installer l’application dans le répertoire.
-- Pour des librairies publiques, c’est pratiquement tout ce qu’il a faire.
-
-https://github.com/apps/codecov
-
-Step 2: Get the repository upload token
+Si la librairie est privée, on doit récupérer le jeton de téléversement en se rendant sur la page de notre librairie dans CodeCov : [https://app.codecov.io/gh](https://app.codecov.io/gh). Le jeton devrait être listé sous la section **Step 1: add repository token as repository secret**, par exemple :
 
 ```
 CODECOV_TOKEN=f8e477db-dc97-4bec-aa76-3ad49a3815c2
 ```
 
-Step 4: Upload coverage reports to Codecov
-
-- Ici, puisque c’est privé, on va devoir téléverser le rapport sur Codecov pour obtenir les statistiques.
-- On fait l’ajout des instructions pour le téléversement au fichier CI.yml.
-- Une fois que les tests sont passés, le rapport est disponible sur codecov.io.
+On va s'en servir à la prochaine étape pour téléverser le rapport sur Codecov pour obtenir les statistiques.
 
 
-### GitHub Workflows
+### GitHub Actions
 
-On va se servir de GitHub pour lancer des processus automatiques qui vont nous informer si la librairie compile (*build status*) et quel est sa couverture avec Codecov.
+On va se servir de GitHub Actions pour lancer des processus automatiques qui vont nous informer si la librairie compile (*build status*) et faire les tests puis envoyer le rapport sur CodeCov.
 
-On doit d’abord créer un nouveau dossier caché `.github` dans lequel on va ajouter le dossier `workflows`. Ce dossier va être celui dans lequel on place les instructions pour dire à GitHub quoi faire lorsqu’on push quelque chose de nouveau sur une branche de notre répertoire.
+On doit d’abord créer un nouveau dossier caché `.github` dans lequel on va ajouter le dossier `workflows`. Ce dossier va être celui dans lequel on place les instructions pour dire à GitHub quoi faire lorsqu’on *push* quelque chose de nouveau sur une branche de notre répertoire, c'est ce qui va lancer nos tests.
 
 ```
 $ mkdir -p .github/workflows
@@ -427,11 +416,10 @@ On va y insérer le fichier d’instructions `ci.yml` :
 $ touch .github/workflows/ci.yml
 ```
 
-Ici, je vais reprendre les instructions déjà écrites pour Extremes.jl mais les instructions sont relativement simple à comprendre.
-
+On va insérer les lignes suivantes : 
 
 ```
-name: Workflow for Codecov example-julia
+name: CI
 on: [push, pull_request]
 jobs:
   run:
@@ -447,12 +435,45 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
+```
+
+Ces instructions sont relativement simples à comprendre, en gros c'est des *jobs* qui sont lancés à chaque *push* et à chaque *pull_request*. 
+
+Si la librairie est privée, on doit ajouter une *job* de plus pour téléverser le rapport sur Codecov. C'est ici que le `CODECOV_TOKEN` sera nécessaire, il faut remplacer `${CODECOV_TOKEN}` par notre jeton, par exemple, `f8e477db-dc97-4bec-aa76-3ad49a3815c2` dans mon cas :
+
+```
       - name: Upload coverage reports to Codecov
       run: |
         curl -Os https://uploader.codecov.io/latest/linux/codecov
         chmod +x codecov
         ./codecov -t ${CODECOV_TOKEN}
 ```
+
+### Badges d'état et de couverture
+
+Pour afficher le taux de couverture calculé par Codecov, on va ajouter le badge de couverture au *README* ainsi que le badge d’état de GitHub Actions pour le *build*.
+
+#### Codecov
+
+[https://app.codecov.io/gh/houton199/NewPackage.jl/settings/badge](https://app.codecov.io/gh/houton199/NewPackage.jl/settings/badge)
+
+*Codecov badge*
+
+[![codecov](https://codecov.io/gh/houton199/ExtendedExtremes.jl/branch/master/graph/badge.svg?token=7UGVMF0ENE)](https://codecov.io/gh/houton199/ExtendedExtremes.jl)
+
+#### GitHub Actions 
+
+[https://github.com/houton199/NewPackage.jl/actions/workflows/ci.yml](https://github.com/houton199/NewPackage.jl/actions/workflows/ci.yml)
+
+<kbd>...</kbd>
+
+*Create status badge*
+
+```
+[![CI](https://github.com/houton199/NewPackage.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/houton199/NewPackage.jl/actions/workflows/ci.yml)
+```
+
+[![CI](https://github.com/JuliaExtremes/ExtendedExtremes.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaExtremes/ExtendedExtremes.jl/actions/workflows/ci.yml)
 
 ---
 ## 5. Documentation
@@ -505,5 +526,7 @@ Ensuite, on recréé la documentation avec make.jl.
 
 ---
 ## 6. Enregistrement au registre de Julia
+
+On peut également ajouter une licence pour compléter notre répertoire.
 
 - https://github.com/JuliaRegistries/Registrator.jl
