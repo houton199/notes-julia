@@ -362,20 +362,25 @@ Pour augmenter la confiance envers notre nouvelle librairie Julia, il est import
 
 La bonne pratique suggère *une fonction, un test*. On peut ainsi structurer nos tests de façon miroir avec la structure des fonctions.
 
-On va créer un dossier *test* avec le fichier *runtests.jl* qui va inclure le fichier de test pour le fichier *functions.jl*.
+On va ajouter un dossier *test* avec les fichiers *runtests.jl* et *functions_test.jl*, 
 
 ```
 NewPackage.jl/
 ├── Project.toml
 ├── README.md
 ├── src
-│   └── NewPackage.jl
+│   ├── NewPackage.jl
+│   └── functions.jl
 └── test
     ├── functions_test.jl
     └── runtests.jl
 ```
 
+Le fichier *runtests.jl* est celui qui va exécuter les tests. Il va appeler les différents fichiers de tests comme *functions_test.jl*, le fichier de test pour *functions.jl*.
+
 Il ne faut pas oublier d’inclure la libraire Test au fichier de projet.
+
+Maintenant qu’on a écrit notre série de test, on peut se servir de Pkg pour les lancer et tester notre librairie.
  
 
 ---
