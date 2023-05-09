@@ -70,7 +70,7 @@ Plus tard, lorsqu'on ajoutera des dépendances à notre librairie, elles seront 
 
 Le fichier de module `src/NewPackage.jl` va être celui où on charge les dépendances, inclut les fichiers de fonctions et exporte les fonctions de notre librairie. Pour le moment, il ne contient qu'une fonction `greet()` générée par défaut par `Pkg` :
 
-```
+```julia
 module NewPackage
 
 greet() = print("Hello World!")
@@ -206,10 +206,6 @@ On peut aussi ajouter un [badge](https://www.repostatus.org/) pour l’état du
 Une librairie Julia exemplaire...
 ```
 
-
-
-
-
 Pour quitter `vi`, il faut quitter le mode insertion avec <kbd>ESC</kbd> et taper `:wq` + <kbd>Enter</kbd> (w pour *write*, q pour *quit*).
 
 
@@ -289,13 +285,13 @@ On va l'ouvrir dans l'éditeur `vi` et y déplacer la fonction `greet()` contenu
 
 Le fichier `src/functions.jl` devrait ressembler à ça :
 
-```
+```julia
 greet() = print("Hello World!")
 ```
 
 et le fichier `src/NewPackage.jl` à ça :
 
-```
+```julia
 module NewPackage
 
 end # module NewPackage
@@ -305,7 +301,7 @@ end # module NewPackage
 
 Pour inclure le nouveau fichier `functions.jl` à notre librairie, on va l'ajouter au module avec `include()`:
 
-```
+```julia
 module NewPackage
 
 include("functions.jl");
@@ -317,7 +313,7 @@ end # module NewPackage
 
 On peut exporter la fonction `greet()` pour y avoir accès sans devoir écrire `NewPackage.` devant à chaque fois :
 
-```
+```julia
 module NewPackage
 
 include("functions.jl");
@@ -331,7 +327,7 @@ end # module NewPackage
 
 C'est aussi dans ce fichier qu'on doit charger les dépendances si nécessaire :
 
-```
+```julia
 module NewPackage
 
 using Distributions
@@ -378,11 +374,58 @@ NewPackage.jl/
 
 Le fichier *runtests.jl* est celui qui va exécuter les tests. Il va appeler les différents fichiers de tests comme *functions_test.jl*, le fichier de test pour *functions.jl*.
 
-Il ne faut pas oublier d’inclure la libraire Test au fichier de projet.
+Pour l'instant, on n'a seulement que la fonction `greet()` à tester, Comme c'est un peu difficile de tester si la fonction imprime le bon message, on va écrire une nouvelle fonction qui retourne une valeur numérique, ça va être plus facile à tester pour les besoins de l'exemple.
 
-Maintenant qu’on a écrit notre série de test, on peut se servir de Pkg pour les lancer et tester notre librairie.
+Dans le fichier `functions.jl`, on va ajouter la fonction suivante :
+
+```julia
+function add_ab(a::Float64, b::Float64)
+
+    return a + b
+end
+```
+
+On va aussi l'ajouter aux exportations de `NewPackage.jl` : 
+
+```julia
+module NewPackage
+
+using Distributions
+
+include("functions.jl");
+
+export greet, add_ab
+
+end # module NewPackage
+```
+
+On va écrire une fonction de test pour notre nouvelle fonction dans le fichier `functions_test.jl` :
+
+```julia
+@testset "functions.jl" begin
+    a = 2.0
+	b = 2.0
+	@test add_ab(a, b) == 4.0
+end
+```
+
+```julia
+using NewPackage
+using Test
+
+@testset "NewPackage.jl" begin
+    include("functions_test.jl")
+end
+```
+
+Il ne faut pas oublier d’inclure la libraire `Test` au fichier de projet.
+
+Maintenant qu’on a écrit notre série de test, on peut se servir de Pkg pour les lancer et tester notre librairie :
+
+```
+pkg> test NewPackage
+```
  
-
 ---
 ## 4. Intégration continue
 
@@ -423,7 +466,7 @@ $ touch .github/workflows/ci.yml
 
 On va insérer les lignes suivantes : 
 
-```
+```yml
 name: CI
 on: [push, pull_request]
 jobs:
@@ -521,7 +564,7 @@ Ensuite, on recréé la documentation avec make.jl.
 - Maintenant qu’on est satisfait de notre site, on peut l’héberger sur GitHub.
 - On va d’abord créer un environnement pour construire la documentation avec Pkg.
 - Ensuite, on ajoute un fichier documentation.yml au dossier .github/workflows.
-- https://documenter.juliadocs.org/stable/man/hosting/#GitHub- Actions
+- https://documenter.juliadocs.org/stable/man/hosting/#GitHub-Actions
 - On va aussi créer un fichier .gitignore pour ne pas inclure les fichiers créer par Documenter au suivi des modifications par git.
 
 - Il suffit ensuite de faire un git push de la documentation sur GitHub.
