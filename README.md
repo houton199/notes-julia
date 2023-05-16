@@ -111,7 +111,7 @@ $ git status
 
 #### Premier commit
 
-On doit ajouter et commiter nos fichiers :
+On doit ajouter et *commiter* nos fichiers :
 
 ```bash
 $ git add src/NewPackage.jl
@@ -159,7 +159,7 @@ On clique sur le bouton vert à droite *New SSH key* puis on nomme la clé (p. e
 
 #### Création du dépot à distance 
 
-Maintenant que la clé SSH de notre ordinateur est lié à notre compte GitHub, on va créer le répertoire associé à notre librairie en se rendant sur [https://github.com/new](https://github.com/new).
+Maintenant que la clé SSH de notre ordinateur est liée à notre compte GitHub, on va créer le répertoire associé à notre librairie en se rendant sur [https://github.com/new](https://github.com/new).
 
 Dans le champ **Repository name**, on va entrer le nom de notre librairie : *NewPackage.jl*.
 
@@ -354,7 +354,7 @@ $ git push origin master
 ---
 ## 3. Tests
 
-Pour augmenter la confiance envers notre nouvelle librairie Julia, il est important de tester ses fonctionnalités.
+Pour augmenter la confiance envers notre nouvelle librairie Julia, il est important de tester ses fonctionnalités. Pour ce faire, nous allons ajouter des tests.
 
 La bonne pratique suggère *une fonction, un test*. On peut ainsi structurer nos tests de façon miroir avec la structure des fonctions.
 
@@ -399,15 +399,17 @@ export greet, add_ab
 end # module NewPackage
 ```
 
-On va écrire une fonction de test pour notre nouvelle fonction dans le fichier `functions_test.jl` :
+On va écrire une fonction de test pour notre nouvelle fonction dans le fichier `functions_test.jl`. Comme la fonciton `add_ab()` fait l'addition des arguments `a` et `b`, on va tester le comportement de la fonction en vérifiant que `2 + 2 = 4` : 
 
 ```julia
 @testset "functions.jl" begin
     a = 2.0
-	b = 2.0
-	@test add_ab(a, b) == 4.0
+    b = 2.0
+    @test add_ab(a, b) == 4.0
 end
 ```
+
+Ensuite, on va inclure notre série de test (un seul pour l'instant) dans le fichier *runtests.jl*. Il ne faut pas oublier d’aussi inclure la libraire `Test` au fichier de projet :
 
 ```julia
 using NewPackage
@@ -417,8 +419,6 @@ using Test
     include("functions_test.jl")
 end
 ```
-
-Il ne faut pas oublier d’inclure la libraire `Test` au fichier de projet.
 
 Maintenant qu’on a écrit notre série de test, on peut se servir de Pkg pour les lancer et tester notre librairie :
 
@@ -431,15 +431,15 @@ pkg> test NewPackage
 
 On aimerait automatiser le processus de test pour vérifier que l’ajout de nouvelles fonctionnalités à notre librairie ne viennent pas tout briser. Également, il serait intéressant d’afficher le taux de couverture de notre librairie, soit le pourcentage de ligne de code qui est couvert par des tests.
 
-### Installation de CodeCov
+### Installation de Codecov
 
-On va se servir de la plateforme *CodeCov* pour évaluer la couverture de notre code.
+On va se servir de la plateforme *Codecov* pour évaluer la couverture de notre code.
 
 On doit d'abord s'inscrire sur le site : [https://app.codecov.io/signup/](https://app.codecov.io/signup/)
 
 Ensuite, on doit installer l’application dans le répertoire sur GitHub : [https://github.com/apps/codecov](https://github.com/apps/codecov). Pour des librairies publiques, c’est pratiquement tout ce qu’il a faire pour cette étape. 
 
-Si la librairie est privée, on doit récupérer le jeton de téléversement en se rendant sur la page de notre librairie dans CodeCov : [https://app.codecov.io/gh](https://app.codecov.io/gh). Le jeton devrait être listé sous la section **Step 1: add repository token as repository secret**, par exemple :
+Si la librairie est privée, on doit récupérer le jeton de téléversement en se rendant sur la page de notre librairie dans Codecov : [https://app.codecov.io/gh](https://app.codecov.io/gh). Le jeton devrait être listé sous la section **Step 1: add repository token as repository secret**, par exemple :
 
 ```
 CODECOV_TOKEN=f8e477db-dc97-4bec-aa76-3ad49a3815c2
@@ -450,7 +450,7 @@ On va s'en servir à la prochaine étape pour téléverser le rapport sur Code
 
 ### GitHub Actions
 
-On va se servir de GitHub Actions pour lancer des processus automatiques qui vont nous informer si la librairie compile (*build status*) et faire les tests puis envoyer le rapport sur CodeCov.
+On va se servir de GitHub Actions pour lancer des processus automatiques qui vont nous informer si la librairie compile (*build status*) et faire les tests puis envoyer le rapport sur Codecov.
 
 On doit d’abord créer un nouveau dossier caché `.github` dans lequel on va ajouter le dossier `workflows`. Ce dossier va être celui dans lequel on place les instructions pour dire à GitHub quoi faire lorsqu’on *push* quelque chose de nouveau sur une branche de notre répertoire, c'est ce qui va lancer nos tests.
 
@@ -503,25 +503,50 @@ Pour afficher le taux de couverture calculé par Codecov, on va ajouter le badge
 
 #### Codecov
 
-[https://app.codecov.io/gh/houton199/NewPackage.jl/settings/badge](https://app.codecov.io/gh/houton199/NewPackage.jl/settings/badge)
+Sur Codecov, le code MarkDown pour générer le badge se trouve sur la page de la librairie dans la section **Badges & Graphs** de l'onglet **[Settings](https://app.codecov.io/gh/houton199/NewPackage.jl/settings/badge)** :
 
-*Codecov badge*
-
+```
 [![codecov](https://codecov.io/gh/houton199/ExtendedExtremes.jl/branch/master/graph/badge.svg?token=7UGVMF0ENE)](https://codecov.io/gh/houton199/ExtendedExtremes.jl)
+```
+
+On va l'ajouter au README sous le badge d'état de la librairie : 
+
+```
+# NewPackage.jl
+
+[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![codecov](https://codecov.io/gh/houton199/ExtendedExtremes.jl/branch/master/graph/badge.svg?token=7UGVMF0ENE)](https://codecov.io/gh/houton199/ExtendedExtremes.jl)
+
+Une librairie Julia exemplaire...
+```
+
+Le badge devrait apparaître après avoir *pushé* les ajouts au README : [![codecov](https://codecov.io/gh/houton199/ExtendedExtremes.jl/branch/master/graph/badge.svg?token=7UGVMF0ENE)](https://codecov.io/gh/houton199/ExtendedExtremes.jl).
+
 
 #### GitHub Actions 
 
-[https://github.com/houton199/NewPackage.jl/actions/workflows/ci.yml](https://github.com/houton199/NewPackage.jl/actions/workflows/ci.yml)
-
-<kbd>...</kbd>
-
-*Create status badge*
+Le badge de status produit par GitHub Actions sur trouve sur GitHub.com dans l'onglet **Actions**. Dans la liste à gauche devrait apparaître le nom du workflow donné dans le fichier d'instructions en .yml, *CI*. On le sélectionne puis à droite, en cliquant sur <kbd>...</kbd>, on a l'option *Create status badge*. On récupère le code du badge avec *Copy status badge MarkDown* :
 
 ```
 [![CI](https://github.com/houton199/NewPackage.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/houton199/NewPackage.jl/actions/workflows/ci.yml)
 ```
 
+On va l'ajouter au README sous les autres badges de la librairie : 
+
+```
+# NewPackage.jl
+
+[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![codecov](https://codecov.io/gh/houton199/ExtendedExtremes.jl/branch/master/graph/badge.svg?token=7UGVMF0ENE)](https://codecov.io/gh/houton199/ExtendedExtremes.jl)
 [![CI](https://github.com/JuliaExtremes/ExtendedExtremes.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaExtremes/ExtendedExtremes.jl/actions/workflows/ci.yml)
+
+Une librairie Julia exemplaire...
+```
+
+Le badge devrait apparaître après avoir *pushé* les ajouts au README : [![CI](https://github.com/JuliaExtremes/ExtendedExtremes.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaExtremes/ExtendedExtremes.jl/actions/workflows/ci.yml).
+
+
+
 
 ---
 ## 5. Documentation
