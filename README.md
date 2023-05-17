@@ -555,7 +555,7 @@ Maintenant que notre librairie est sur GitHub et qu’elle est testée, nous po
 
 ### Structure
 
-On va construire la structure de la documentation dans notre répertoire en créant d’abord un dossier `docs` dans lequel on va ajouter le dossier `src`, qui va être le dossier dans lequel on va écrire la documentation, et un fichier `make.jl`, qui est le script julia qui va générer la documentation.
+On va commencer par construire la structure de notre documentation. Dans le répertoire racine de notre librairie, on créer d’abord un dossier `docs` dans lequel on va ajouter le dossier `src`, qui sera le dossier dans lequel on va écrire la documentation, et un fichier `make.jl`, qui sera le script Julia qui va générer la documentation avec *Documenter.jl*.
 
 ```
 docs/
@@ -563,12 +563,27 @@ docs/
 └── make.jl
 ```
 
-Pour commencer, on va créer un fichier index.md qui va être la page d’accueil de la documentation.
-On peut ensuite utiliser julia et la librairie Documenter pour construire les pages du site web.
+Le dossier `src` va contenir les fichiers MarkDown des pages du site de la documentation. Lorsqu'on va exécuter le script `make.jl`, *Documenter.jl* va générer le code html qui va constituer le site de la documentation à partir des fichiers MarkDown.
+
+Pour commencer, on va créer un fichier index.md qui sera la page d’accueil de la documentation.
+
+
+Puis, on écrit le fichier `make.jl` :
+
+```julia
+using Documenter, NewPackage
+
+makedocs(sitename="NewPackage.jl",
+    pages = ["index.md"])
+
+```
+
 
 ```
 $ julia make.jl
 ```
+
+
 
 Avant d’héberger la documentation, on peut vérifier de quoi ça a l’air localement.
 La librairie Julia ```LiveServer.jl``` va nous être utile.
@@ -600,6 +615,9 @@ Ensuite, on recréé la documentation avec make.jl.
 ---
 ## 6. Enregistrement au registre de Julia
 
-On peut également ajouter une licence pour compléter notre répertoire.
-
 - https://github.com/JuliaRegistries/Registrator.jl
+
+### License 
+
+On va ajouter une licence pour compléter notre répertoire.
+
